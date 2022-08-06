@@ -18,6 +18,7 @@ parser.add_argument('--max_step', default=40, type=int, help='max length for epi
 parser.add_argument('--actor', default='./model/Paint-run1/actor.pkl', type=str, help='Actor model')
 parser.add_argument('--renderer', default='./renderer.pkl', type=str, help='renderer model')
 parser.add_argument('--img', default='image/test.png', type=str, help='test image')
+parser.add_argument('--output_dir', default='outputs', type=str, help='outputs directory')
 parser.add_argument('--imgid', default=0, type=int, help='set begin number for generated image')
 parser.add_argument('--divide', default=4, type=int, help='divide the target image to get better resolution')
 args = parser.parse_args()
@@ -87,7 +88,8 @@ def smooth(img):
                     img = smooth_pix(img, x + width, y + k)
     return img
 
-def save_img(res, imgid, divide=False):
+
+def save_img(output_dir, res, imgid, divide=False):
     output = res.detach().cpu().numpy() # d * d, 3, width, width    
     output = np.transpose(output, (0, 2, 3, 1))
     if divide:
@@ -96,8 +98,8 @@ def save_img(res, imgid, divide=False):
     else:
         output = output[0]
     output = (output * 255).astype('uint8')
-    output = cv2.resize(output, origin_shape)
-    cv2.imwrite('output/generated' + str(imgid) + '.png', output)
+    output = cv2.resize(output, origin_shape,interpolation=cv2.INTER_LANCZOS4)
+    cv2.imwrite(f'{output_dir}/generated' + str(imgid) + '.png', output)
 
 actor = ResNet(9, 18, 65) # action_bundle = 5, 65 = 5 * 13
 actor.load_state_dict(torch.load(args.actor))
@@ -116,7 +118,8 @@ img = img.reshape(1, width, width, 3)
 img = np.transpose(img, (0, 3, 1, 2))
 img = torch.tensor(img).to(device).float() / 255.
 
-os.system('mkdir output')
+target_dir = f"{args.output_dir}/{os.path.basename(args.img).split('.')[0]}"
+os.makedirs(target_dir,mode=0o777, exist_ok=True)
 
 with torch.no_grad():
     if args.divide != 1:
@@ -127,7 +130,7 @@ with torch.no_grad():
         canvas, res = decode(actions, canvas)
         print('canvas step {}, L2Loss = {}'.format(i, ((canvas - img) ** 2).mean()))
         for j in range(5):
-            save_img(res[j], args.imgid)
+            save_img(target_dir, res[j], args.imgid)
             args.imgid += 1
     if args.divide != 1:
         canvas = canvas[0].detach().cpu().numpy()
@@ -144,5 +147,5 @@ with torch.no_grad():
             canvas, res = decode(actions, canvas)
             print('divided canvas step {}, L2Loss = {}'.format(i, ((canvas - patch_img) ** 2).mean()))
             for j in range(5):
-                save_img(res[j], args.imgid, True)
+                save_img(target_dir, res[j], args.imgid, True)
                 args.imgid += 1
