@@ -52,8 +52,8 @@ def draw_graphite(f_: Union[List[Any], Tuple[Any]],
     r0 = (int)(1 + r0 * width // 2)
     r2 = (int)(1 + r2 * width // 2)
     canvas = np.zeros([width * 2, width * 2]).astype('float32')
-    tmp = 1. / 400
-    for i in range(400):
+    tmp = 1. / 450
+    for i in range(450):
         t = i * tmp
         x = (int)((1-t) * (1-t) * x0 + 2 * t * (1-t) * x1 + t * t * x2)
         y = (int)((1-t) * (1-t) * y0 + 2 * t * (1-t) * y1 + t * t * y2)
@@ -93,18 +93,18 @@ if __name__ == '__main__':
     p11 = (0, 0.35)
     p22 = (0.5, 0.8)
 
-    radius = (5/512, 20 / 512)  # (2/512, 4 / 512)  # start, end
+    radius = (1/1250, 1.5 / 1250)  # (2/512, 4 / 512)  # start, end
     colors = (50, 150)  # start, end
     smoothness = 0.7
 
     f = (*p0, *p1, *p2, *radius, *colors, smoothness)
 
-    res = draw_graphite(f)
+    res = draw_graphite(f,1250)
 
-    radius2 = [17/512, 17/512]
+    radius2 = [1/1250, 1/1250]
     colors2 = [160, 160]
     f2 = (*p00, *p11, *p22, *radius2, *colors2, smoothness)
-    res2 = draw_graphite(f2)
+    res2 = draw_graphite(f2, 1250)
 
     merged_res = blend_strokes(res, res2, mode="darken")
     fig, axes = plt.subplots(1,3, figsize=(45, 15))
@@ -114,5 +114,5 @@ if __name__ == '__main__':
     axes[1].imshow(res2, cmap="gray")
     axes[2].imshow(merged_res, cmap="gray")
     plt.show()
-    plt.imsave("/Users/eyalziv/my_projects/VirtuArt/ICCV2019-LearningToPaint/baseline/Renderer/graphite_blending.png",
+    plt.imsave("/Users/eyalziv/my_projects/VirtuArt/ICCV2019-LearningToPaint/baseline/Renderer/graphite_blending_50cm_0.4mm_pixel.png",
                np.hstack([res, res2, merged_res]), cmap="gray")
