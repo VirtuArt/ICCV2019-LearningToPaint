@@ -1,6 +1,6 @@
 import os
 import torch
-from torch.autograd import Variable
+# from torch.autograd import Variable
 
 USE_CUDA = torch.cuda.is_available()
 

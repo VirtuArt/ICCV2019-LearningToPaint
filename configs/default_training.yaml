@@ -1,0 +1,18 @@
+---
+
+warmup: 400  # timestep without training but only filling the replay memory
+discount: 0.7737809375  # discount factor (0.95**5)
+batch_size: 96  # minibatch size
+rmsize: 800  # replay memory size
+env_batch: 96  # concurrent environment number
+tau: 0.001  # moving average for target network
+max_step: 40  # max length for episode
+noise_factor: 0  # noise level for parameter space noise
+validate_interval: 50  # how many episodes to perform a validation
+validate_episodes: 5  # how many episode to perform during validation
+train_times: 2000000  # total traintimes
+episode_train_times: 10  # train times for each episode
+resume: None  # Resuming model path for testing
+output: ./model  # Resuming model path for testing
+debug: False  # 'print some info
+seed: 1234  # random seed

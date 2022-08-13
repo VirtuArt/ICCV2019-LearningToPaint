@@ -1,14 +1,14 @@
 import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
+# import torch.nn.functional as F
 from torch.optim import Adam, SGD
-from Renderer.model import *
-from DRL.rpm import rpm
-from DRL.actor import *
-from DRL.critic import *
-from DRL.wgan import *
-from utils.util import *
+from baseline_modelfree.Renderer.model import FCN
+from baseline_modelfree.DRL.rpm import rpm
+from baseline_modelfree.DRL.actor import ResNet
+from baseline_modelfree.DRL.critic import ResNet_wobn
+from baseline_modelfree.DRL.wgan import cal_reward, update, load_gan, save_gan
+from baseline_modelfree.utils.util import hard_update, soft_update, to_tensor, to_numpy
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 coord = torch.zeros([1, 2, 128, 128])

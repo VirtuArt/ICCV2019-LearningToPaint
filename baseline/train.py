@@ -1,12 +1,22 @@
 #!/usr/bin/env python3
-import cv2
+# import cv2
+# import os
 import random
 import numpy as np
 import argparse
-from DRL.evaluator import Evaluator
-from utils.util import *
-from utils.tensorboard import TensorBoard
+
+import yaml
+
+from baseline.DRL.evaluator import Evaluator
+import os
+# os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'  # required for running this script on my Mac
+# os.environ['KMP_AFFINITY'] = 'False'  # required for running this script on my Mac
+from baseline.utils.util import prRed, prBlack, get_output_folder
+from baseline.utils.tensorboard import TensorBoard
+from baseline.DRL.ddpg import DDPG
+from baseline.DRL.multi import fastenv
 import time
+import torch
 
 exp = os.path.abspath('.').split('/')[-1]
 writer = TensorBoard('../train_log/{}'.format(exp))
@@ -76,39 +86,60 @@ def train(agent, env, evaluate):
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Learning to Paint')
+    parser.add_argument('-c', '--config', default="../configs/default_training.yaml", type=str,
+                        help="Path to the training config yaml")
 
-    # hyper-parameter
-    parser.add_argument('--warmup', default=400, type=int, help='timestep without training but only filling the replay memory')
-    parser.add_argument('--discount', default=0.95**5, type=float, help='discount factor')
-    parser.add_argument('--batch_size', default=96, type=int, help='minibatch size')
-    parser.add_argument('--rmsize', default=800, type=int, help='replay memory size')
-    parser.add_argument('--env_batch', default=96, type=int, help='concurrent environment number')
-    parser.add_argument('--tau', default=0.001, type=float, help='moving average for target network')
-    parser.add_argument('--max_step', default=40, type=int, help='max length for episode')
-    parser.add_argument('--noise_factor', default=0, type=float, help='noise level for parameter space noise')
-    parser.add_argument('--validate_interval', default=50, type=int, help='how many episodes to perform a validation')
-    parser.add_argument('--validate_episodes', default=5, type=int, help='how many episode to perform during validation')
-    parser.add_argument('--train_times', default=2000000, type=int, help='total traintimes')
-    parser.add_argument('--episode_train_times', default=10, type=int, help='train times for each episode')    
-    parser.add_argument('--resume', default=None, type=str, help='Resuming model path for testing')
-    parser.add_argument('--output', default='./model', type=str, help='Resuming model path for testing')
-    parser.add_argument('--debug', dest='debug', action='store_true', help='print some info')
-    parser.add_argument('--seed', default=1234, type=int, help='random seed')
-    
-    args = parser.parse_args()    
-    args.output = get_output_folder(args.output, "Paint")
-    np.random.seed(args.seed)
-    torch.manual_seed(args.seed)
-    if torch.cuda.is_available(): torch.cuda.manual_seed_all(args.seed)
-    random.seed(args.seed)
+    args = parser.parse_args()
+    with open(args.config, 'r') as fp:
+        training_config = yaml.full_load(fp)
+
+    # # hyper-parameter
+    # parser.add_argument('--warmup', default=400, type=int, help='timestep without training but only filling the replay memory')
+    # parser.add_argument('--discount', default=0.95**5, type=float, help='discount factor')
+    # parser.add_argument('--batch_size', default=96, type=int, help='minibatch size')
+    # parser.add_argument('--rmsize', default=800, type=int, help='replay memory size')
+    # parser.add_argument('--env_batch', default=96, type=int, help='concurrent environment number')
+    # parser.add_argument('--tau', default=0.001, type=float, help='moving average for target network')
+    # parser.add_argument('--max_step', default=40, type=int, help='max length for episode')
+    # parser.add_argument('--noise_factor', default=0, type=float, help='noise level for parameter space noise')
+    # parser.add_argument('--validate_interval', default=50, type=int, help='how many episodes to perform a validation')
+    # parser.add_argument('--validate_episodes', default=5, type=int, help='how many episode to perform during validation')
+    # parser.add_argument('--train_times', default=2000000, type=int, help='total traintimes')
+    # parser.add_argument('--episode_train_times', default=10, type=int, help='train times for each episode')
+    # parser.add_argument('--resume', default=None, type=str, help='Resuming model path for testing')
+    # parser.add_argument('--output', default='./model', type=str, help='Resuming model path for testing')
+    # parser.add_argument('--debug', dest='debug', action='store_true', help='print some info')
+    # parser.add_argument('--seed', default=1234, type=int, help='random seed')
+    #
+    # args = parser.parse_args()
+    training_config["output"] = get_output_folder(training_config["output"], "Paint")
+    np.random.seed(training_config["seed"])
+    torch.manual_seed(training_config["seed"])
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(training_config["seed"])
+    random.seed(training_config["seed"])
     torch.backends.cudnn.deterministic = False
     torch.backends.cudnn.benchmark = True
-    from DRL.ddpg import DDPG
-    from DRL.multi import fastenv
-    fenv = fastenv(args.max_step, args.env_batch, writer)
-    agent = DDPG(args.batch_size, args.env_batch, args.max_step, \
-                 args.tau, args.discount, args.rmsize, \
-                 writer, args.resume, args.output)
-    evaluate = Evaluator(args, writer)
+
+    fenv = fastenv(training_config["max_step"],
+                   training_config["env_batch"],
+                   writer)
+
+    agent = DDPG(training_config["batch_size"],
+                 training_config["env_batch"],
+                 training_config["max_step"],
+                 training_config["tau"],
+                 training_config["discount"],
+                 training_config["rmsize"],
+                 writer,
+                 training_config["resume"],
+                 training_config["output"])
+
+    evaluate = Evaluator(validate_episodes=training_config["validate_episodes"],
+                         max_step=training_config["max_step"],
+                         env_batch=training_config["env_batch"],
+                         writer=writer)
+
     print('observation_space', fenv.observation_space, 'action_space', fenv.action_space)
+
     train(agent, fenv, evaluate)

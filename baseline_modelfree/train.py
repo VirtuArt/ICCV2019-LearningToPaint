@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-import cv2
+# import cv2
 import random
 import numpy as np
 import argparse
-from DRL.evaluator import Evaluator
-from utils.util import *
-from utils.tensorboard import TensorBoard
+from baseline_modelfree.DRL.evaluator import Evaluator
+from baseline_modelfree.utils.util import prRed, prBlack, get_output_folder
+from baseline_modelfree.utils.tensorboard import TensorBoard
 import time
+import torch
+import os
 
 exp = os.path.abspath('.').split('/')[-1]
 writer = TensorBoard('../train_log/{}'.format(exp))
@@ -103,8 +105,8 @@ if __name__ == "__main__":
     random.seed(args.seed)
     torch.backends.cudnn.deterministic = False
     torch.backends.cudnn.benchmark = False
-    from DRL.ddpg import DDPG
-    from DRL.multi import fastenv
+    from baseline_modelfree.DRL.ddpg import DDPG
+    from baseline_modelfree.DRL.multi import fastenv
     fenv = fastenv(args.max_step, args.env_batch, writer)
     agent = DDPG(args.batch_size, args.env_batch, args.max_step, \
                  args.tau, args.discount, args.rmsize, \

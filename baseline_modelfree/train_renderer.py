@@ -1,12 +1,12 @@
-import cv2
+# import cv2
 import torch
 import numpy as np
 
 import torch.nn as nn
-import torch.nn.functional as F
-from utils.tensorboard import TensorBoard
-from Renderer.model import FCN
-from Renderer.stroke_gen import *
+# import torch.nn.functional as F
+from baseline_modelfree.utils.tensorboard import TensorBoard
+from baseline_modelfree.Renderer.model import FCN
+from baseline_modelfree.Renderer.stroke_gen import draw
 
 writer = TensorBoard("../train_log/")
 import torch.optim as optim

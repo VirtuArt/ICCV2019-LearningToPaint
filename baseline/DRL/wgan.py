@@ -1,13 +1,13 @@
 import torch
 import torch.nn as nn
-import numpy as np
+# import numpy as np
 from torch.optim import Adam, SGD
 from torch import autograd
 from torch.autograd import Variable
 import torch.nn.functional as F
-from torch.autograd import grad as torch_grad
+# from torch.autograd import grad as torch_grad
 import torch.nn.utils.weight_norm as weightNorm
-from utils.util import *
+from baseline.utils.util import soft_update, hard_update
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 dim = 128

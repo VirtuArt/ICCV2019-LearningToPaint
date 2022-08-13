@@ -8,7 +8,7 @@
 import numpy as np
 import argparse
 import cv2
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from scipy.ndimage.morphology import binary_opening,  binary_closing
 
 # construct the argument parser and parse the arguments

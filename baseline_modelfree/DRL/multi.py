@@ -1,9 +1,9 @@
 import cv2
 import torch
-import numpy as np
-from env import Paint
-from utils.util import *
-from DRL.ddpg import decode
+# import numpy as np
+from baseline_modelfree.env import Paint
+from baseline_modelfree.utils.util import to_numpy
+# from baseline_modelfree.DRL.ddpg import decode
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class fastenv():

@@ -1,14 +1,15 @@
 import os
 import cv2
-import torch
+# import torch
 import numpy as np
 import argparse
-import torch.nn as nn
-import torch.nn.functional as F
+# import torch.nn as nn
+# import torch.nn.functional as F
+import torch
 
-from DRL.actor import *
-from Renderer.stroke_gen import *
-from Renderer.model import *
+# from DRL.actor import *
+from baseline_modelfree.DRL.actor import ResNet
+from baseline_modelfree.Renderer.model import FCN
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 width = 128
