@@ -43,8 +43,17 @@ while step < 500000:
     ground_truth = []
     for i in range(batch_size):
         f = np.random.uniform(0, 1, 10)
+        """ (x0, y0, x1, y1, x2, y2, r0, r2, c0, c2, smoothness). s.t r_i are the radii at the edges, c_i represent the colors
+              All values are normalized by the canvas size"""
+        f = np.random.uniform(0, 1, 8)
+        r2 = min(1.0, f[6] * (1 + np.random.randn()))  # allow maximum 100% change of width
+        c2 = min(1.0, f[7] * (1 + np.random.randn()))  # allow maximum 100% change of color
+        f = np.hstack([f[:7], r2, f[7], c2])
+
         train_batch.append(f)
-        ground_truth.append(draw(f))
+        # ground_truth.append(draw(f))
+        ground_truth.append(draw_graphite(f))
+
 
     train_batch = torch.tensor(train_batch).float()
     ground_truth = torch.tensor(ground_truth).float()

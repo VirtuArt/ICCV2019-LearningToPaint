@@ -30,7 +30,7 @@ def draw(f, width=128):
     return 1 - cv2.resize(canvas, dsize=(width, width))
 
 
-def draw_graphite(f_: Union[List[Any], Tuple[Any]],
+def draw_graphite(f_: np.ndarray,
                   width: int = 512) -> np.core.ndarray:
     """
     Draw a Graphite stroke on top of a clean canvas
@@ -93,13 +93,15 @@ if __name__ == '__main__':
     p11 = (0, 0.35)
     p22 = (0.5, 0.8)
 
-    radius = (1/1250, 1.5 / 1250)  # (2/512, 4 / 512)  # start, end
-    colors = (50, 150)  # start, end
+    radius = (10/1250, 20 / 1250)  # (2/512, 4 / 512)  # start, end
+    colors = (50, 100)  # start, end
     smoothness = 0.7
 
     f = (*p0, *p1, *p2, *radius, *colors, smoothness)
 
     res = draw_graphite(f,1250)
+    plt.imshow(res, cmap="gray");
+    plt.show()
 
     radius2 = [1/1250, 1/1250]
     colors2 = [160, 160]
