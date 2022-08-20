@@ -4,6 +4,9 @@ tensorboardx
 numpy
 # opencv-python~=3.4.0
 opencv-python
+pillow==9.2.0
+scipy==1.7.3
+matplotlib
 # torchvision==0.9.1
 # nomkl  # local only
 #
